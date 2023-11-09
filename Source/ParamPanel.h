@@ -12,11 +12,9 @@
 
 #include <JuceHeader.h>
 
-//==============================================================================
 /*
 */
-class ParamPanel  : public juce::Component
-{
+class ParamPanel  : public juce::Component {
 public:
     ParamPanel();
     ~ParamPanel() override;
@@ -35,6 +33,7 @@ private:
      - midi file tempo
      
      - enable denoising checkbox
+     - enable classifier checkbox
      */
     juce::Slider noteSegSlider;
     juce::Label noteSegLabel;

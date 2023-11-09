@@ -11,9 +11,7 @@
 #include <JuceHeader.h>
 #include "ParamPanel.h"
 
-//==============================================================================
-ParamPanel::ParamPanel()
-{
+ParamPanel::ParamPanel() {
     // Note Segmentation Slider and Label
     addAndMakeVisible(noteSegSlider);
     noteSegSlider.setRange(0, 100, 1.0);
@@ -65,13 +63,9 @@ ParamPanel::ParamPanel()
 }
 
 
-ParamPanel::~ParamPanel()
-{
+ParamPanel::~ParamPanel(){}
 
-}
-
-void ParamPanel::paint (juce::Graphics& g)
-{
+void ParamPanel::paint (juce::Graphics& g) {
     /* This demo code just fills the component's background and
        draws some placeholder text to get you started.
 
@@ -88,8 +82,7 @@ void ParamPanel::paint (juce::Graphics& g)
     g.setFont (14.0f);
 }
 
-void ParamPanel::resized()
-{
+void ParamPanel::resized() {
     int NUM = 13;
     auto area = getLocalBounds().reduced(10);
     auto unitHeight = area.getHeight() / NUM;

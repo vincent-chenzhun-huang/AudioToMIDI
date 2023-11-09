@@ -6,8 +6,7 @@
 
 class FileWindow: public juce::AudioAppComponent,
                   public juce::FileDragAndDropTarget,
-                  public juce::ChangeListener
-{
+                  public juce::ChangeListener {
 public:
     FileWindow();
     ~FileWindow() override;

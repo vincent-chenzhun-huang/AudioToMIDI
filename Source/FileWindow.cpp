@@ -1,8 +1,7 @@
 #include "FileWindow.h"
 
 //==============================================================================
-FileWindow::FileWindow(): state(Stopped)
-{
+FileWindow::FileWindow(): state(Stopped) {
     setName("File Window");
     setOpaque(true);
     setInterceptsMouseClicks(true, true);
@@ -30,8 +29,7 @@ FileWindow::FileWindow(): state(Stopped)
     setAudioChannels(0, 2);
 }
 
-FileWindow::~FileWindow()
-{
+FileWindow::~FileWindow() {
     shutdownAudio();
 }
 
