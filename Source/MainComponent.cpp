@@ -2,7 +2,7 @@
 
 //==============================================================================
 MainComponent::MainComponent() {
-    setSize (1000, 800);
+    setSize (700, 500);
     addAndMakeVisible(fileWindowComponent);
     addAndMakeVisible(paramPanel);
     addAndMakeVisible(midiOutput);
@@ -17,6 +17,6 @@ void MainComponent::paint (juce::Graphics& g) {
 
 void MainComponent::resized() {
     fileWindowComponent.setBounds(0, 0, getWidth() / 2, getHeight() / 3);
-    paramPanel.setBounds(0, getHeight() / 3, getWidth() / 2, getHeight() * 2 / 3);
-    midiOutput.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight());
+    paramPanel.setBounds(0, getHeight() / 3, getWidth(), getHeight() * 2 / 3);
+    midiOutput.setBounds(getWidth() / 2, 0, getWidth() / 2, getHeight() / 3);
 }

@@ -85,6 +85,7 @@ void FileWindow::filesDropped(const juce::StringArray& filenames, int x, int y) 
         transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
         juce::Logger::writeToLog("Activate playback button");
         playButton.setEnabled(true);
+        convertButton.setEnabled(true);
         readerSource.reset(newSource.release());  // assign the ownership of the resource to the class field so that the memory doesn't get released when this function finishes running
     }
 }

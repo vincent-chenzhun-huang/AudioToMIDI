@@ -28,11 +28,17 @@ void MIDIOutput::paint (juce::Graphics& g) {
 
     g.setColour (juce::Colours::grey);
     g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
+    
+    auto localBounds = getLocalBounds();
+    auto titleArea = localBounds.withHeight(4 * getHeight() / 5);
+    
     g.setColour (juce::Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("MIDIOutput", getLocalBounds(),
+    g.setFont (25.0f);
+    g.drawText ("OutputArea", titleArea,
                 juce::Justification::centred, true);   // draw some placeholder text
+    auto subTitleArea = localBounds.withTop(localBounds.getHeight() / 3);
+    g.setFont(14.0f);
+    g.drawText("Drag and drop into your favorite DAW", subTitleArea, juce::Justification::centred, true);
 }
 
 void MIDIOutput::mouseDrag(const juce::MouseEvent &event) {
