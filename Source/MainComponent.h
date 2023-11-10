@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "FileWindow.h"
 #include "ParamPanel.h"
+#include "MIDIOutput.h"
 
 //==============================================================================
 /*
@@ -20,6 +21,7 @@ public:
 private:
     FileWindow fileWindowComponent; // the area to drop a file
     ParamPanel paramPanel; // the area for the collection of sliders and checkboxes
+    MIDIOutput midiOutput;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

@@ -1,6 +1,5 @@
 #include "FileWindow.h"
 
-//==============================================================================
 FileWindow::FileWindow(): state(Stopped) {
     setName("File Window");
     setOpaque(true);

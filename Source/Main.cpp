@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file contains the basic startup code for a JUCE application.
-
-  ==============================================================================
-*/
-
 #include <JuceHeader.h>
 #include "MainComponent.h"
 
@@ -29,8 +21,6 @@ public:
     }
 
     void shutdown() override {
-        // Add your application's shutdown code here..
-
         mainWindow = nullptr; // (deletes our window)
     }
 
@@ -49,7 +39,6 @@ public:
 
 
 private:
-    //==============================================================================
     /*
         This class implements the desktop window that contains an instance of
         our MainComponent class.

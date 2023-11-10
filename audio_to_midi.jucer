@@ -4,6 +4,8 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="i3lPKf" name="AudioToMIDI">
     <GROUP id="{553D1215-03EF-3121-DF17-6D6565E31F5D}" name="Source">
+      <FILE id="YXXSRn" name="MIDIOutput.cpp" compile="1" resource="0" file="Source/MIDIOutput.cpp"/>
+      <FILE id="UohHwk" name="MIDIOutput.h" compile="0" resource="0" file="Source/MIDIOutput.h"/>
       <FILE id="YhDPnt" name="ParamPanel.cpp" compile="1" resource="0" file="Source/ParamPanel.cpp"/>
       <FILE id="O0fL2F" name="ParamPanel.h" compile="0" resource="0" file="Source/ParamPanel.h"/>
       <FILE id="oMagiz" name="FileWindow.cpp" compile="1" resource="0" file="Source/FileWindow.cpp"/>
