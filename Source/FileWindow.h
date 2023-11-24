@@ -59,7 +59,9 @@ private:
     // I/O
     juce::File droppedFile;
     std::string droppedFilePath;
+    juce::File outputFile;
     std::string outputDirectory;
+    
     // Python API
     int callBasicPitch(std::vector<std::string> audioPathList,
                        std::string outputDirectory,

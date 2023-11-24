@@ -43,8 +43,16 @@ void MIDIOutput::paint (juce::Graphics& g) {
 
 void MIDIOutput::mouseDrag(const juce::MouseEvent &event) {
     
-    juce::File dummyFile("/Users/vincenthuang/Development/audio_to_midi/Source/test_midi.mid");
-    juce::FileInputStream dummyStream(dummyFile);
+//    juce::File dummyFile("/Users/vincenthuang/Development/audio_to_midi/Source/test_midi.mid");
+    
+    if (!parameters.isValid() || !parameters.hasProperty("outputFilePath")) {
+        juce::Logger::writeToLog("The output file cannot be found, cannot drag");
+        return;
+    }
+//    juce::Logger::writeToLog("The output file path is: " + parameters.getProperty("outputFile"));
+    juce::File outputFile = juce::File(parameters.getProperty("outputFilePath"));
+    
+    juce::FileInputStream dummyStream(outputFile);
     juce::MidiFile midiFile;
     midiFile.readFrom(dummyStream);
     

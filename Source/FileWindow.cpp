@@ -29,10 +29,14 @@ FileWindow::FileWindow(juce::ValueTree& params): parameters(params), state(Stopp
     formatManager.registerBasicFormats(); // register the basic audio file formats, wav, aiff files
     transportSource.addChangeListener(this); // when there is a change in the transportSource, we trigger the changeListenerCallback function
     setAudioChannels(0, 2);
+    
+    Py_Initialize();
 }
 
 FileWindow::~FileWindow() {
     shutdownAudio();
+    Py_Finalize();
+
 }
 
 void FileWindow::playButtonClicked() {
@@ -78,7 +82,20 @@ int FileWindow::convertMidiClicked() {
     std::ostringstream logStream;
     logStream << "Converting to MIDI using values: minNoteLength: " << minNoteLength << " - minPitch: " << minPitch << " - maxPitch: " << maxPitch << " - midiTempo: " << midiTempo;
     juce::Logger::writeToLog(logStream.str());
-    return callBasicPitch(audioPathList, outputDirectory, saveMidi, minNoteLength, minPitch, maxPitch, multiplePitchBends, midiTempo);
+    int res = callBasicPitch(audioPathList, outputDirectory, saveMidi, minNoteLength, minPitch, maxPitch, multiplePitchBends, midiTempo);
+    
+    if (res != 0) {
+        juce::Logger::writeToLog("An error occurred while converting the audio file to MIDI");
+        return -1;
+    }
+    
+    
+    // otherwise, write the output file object to the value tree
+    juce::String outputFileName = droppedFile.getFileNameWithoutExtension() + "_basic_pitch.mid";
+    outputFile = juce::File(outputDirectory).getChildFile(outputFileName);
+    juce::Logger::writeToLog(outputFile.getFullPathName());
+    parameters.setProperty("outputFilePath", outputFile.getFullPathName(), nullptr);
+    return 0;
 }
 
 int FileWindow::callBasicPitch(std::vector<std::string> audioPathList,
@@ -92,7 +109,6 @@ int FileWindow::callBasicPitch(std::vector<std::string> audioPathList,
     PyObject *pName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
     // Py_SetPath(L"/Users/vincenthuang/Development/basic_pitch_test");
-    Py_Initialize();
 
     PyRun_SimpleString("import sys, os");
     PyRun_SimpleString("sys.path.append('/Users/vincenthuang/Development/basic_pitch_test')");
@@ -171,7 +187,6 @@ int FileWindow::callBasicPitch(std::vector<std::string> audioPathList,
         return 1;
     }
 
-    Py_Finalize();
     return 0;
 }
 
