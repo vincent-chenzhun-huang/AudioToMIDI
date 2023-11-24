@@ -16,7 +16,7 @@
 */
 class ParamPanel  : public juce::Component {
 public:
-    ParamPanel();
+    ParamPanel(juce::ValueTree& params);
     ~ParamPanel() override;
 
     void paint (juce::Graphics&) override;
@@ -35,8 +35,11 @@ private:
      - enable denoising checkbox
      - enable classifier checkbox
      */
+    juce::ValueTree& parameters;
+    
     juce::Slider noteSegSlider;
     juce::Label noteSegLabel;
+    
     
     juce::Slider modelConfThresholdSlider;
     juce::Label modelConfThresholdLabel;

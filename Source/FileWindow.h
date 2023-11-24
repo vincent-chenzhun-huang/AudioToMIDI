@@ -1,14 +1,16 @@
 #pragma once
 
+#include <sstream>
 #include <JuceHeader.h>
-
+#include <Python.h>
+#include <cassert>
 
 
 class FileWindow: public juce::AudioAppComponent,
                   public juce::FileDragAndDropTarget,
                   public juce::ChangeListener {
 public:
-    FileWindow();
+    FileWindow(juce::ValueTree&);
     ~FileWindow() override;
 
     void paint (juce::Graphics&) override;
@@ -26,9 +28,10 @@ public:
     
     // ChangeListener functions
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
-    
+    int convertMidiClicked();
 
 private:
+    juce::ValueTree& parameters;
     // Playback buttons
     juce::TextButton playButton;
     juce::TextButton convertButton;
@@ -55,6 +58,16 @@ private:
 
     // I/O
     juce::File droppedFile;
-
+    std::string droppedFilePath;
+    std::string outputDirectory;
+    // Python API
+    int callBasicPitch(std::vector<std::string> audioPathList,
+                       std::string outputDirectory,
+                       bool saveMidi,
+                       int minNoteLength,
+                       int minPitch,
+                       int maxPitch,
+                       bool multiplePitchBends,
+                       int midiTempo);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileWindow);
 };

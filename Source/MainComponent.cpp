@@ -1,7 +1,11 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent() {
+MainComponent::MainComponent()
+    : params("Parameters"),
+      fileWindowComponent(params),
+      paramPanel(params),
+      midiOutput(params) {
     setSize (700, 500);
     addAndMakeVisible(fileWindowComponent);
     addAndMakeVisible(paramPanel);

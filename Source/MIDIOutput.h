@@ -19,7 +19,7 @@ class MIDIOutput  : public juce::Component,
                     public juce::DragAndDropContainer
 {
 public:
-    MIDIOutput();
+    MIDIOutput(juce::ValueTree& params);
     ~MIDIOutput() override;
 
     void paint (juce::Graphics&) override;
@@ -27,5 +27,6 @@ public:
     void mouseDrag(const juce::MouseEvent& event) override;
 
 private:
+    juce::ValueTree& parameters;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MIDIOutput)
 };

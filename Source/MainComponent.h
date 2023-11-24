@@ -19,6 +19,7 @@ public:
     void resized() override;
 
 private:
+    juce::ValueTree params;
     FileWindow fileWindowComponent; // the area to drop a file
     ParamPanel paramPanel; // the area for the collection of sliders and checkboxes
     MIDIOutput midiOutput;

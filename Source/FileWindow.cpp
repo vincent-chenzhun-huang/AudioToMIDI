@@ -1,6 +1,6 @@
 #include "FileWindow.h"
 
-FileWindow::FileWindow(): state(Stopped) {
+FileWindow::FileWindow(juce::ValueTree& params): parameters(params), state(Stopped) {
     setName("File Window");
     setOpaque(true);
     setInterceptsMouseClicks(true, true);
@@ -21,6 +21,9 @@ FileWindow::FileWindow(): state(Stopped) {
     
     addAndMakeVisible(&convertButton);
     convertButton.setButtonText("Convert to MIDI");
+    convertButton.onClick = [this] {
+        convertMidiClicked();
+    };
     convertButton.setEnabled(false);
     
     formatManager.registerBasicFormats(); // register the basic audio file formats, wav, aiff files
@@ -38,6 +41,138 @@ void FileWindow::playButtonClicked() {
 
 void FileWindow::stopButtonClicked() {
     changeState(Stopping);
+}
+
+int FileWindow::convertMidiClicked() {
+    // Set the PYTHONHOME environment variable to the Python interpreter's directory
+    // This helps in locating the Python runtime
+    // wchar_t *pythonHome = Py_DecodeLocale("basic_pitch_test", NULL);
+    // Py_SetPythonHome(pythonHome);
+
+    // Initialize the Python interpreter
+    assert (droppedFile != NULL);
+    if (!droppedFile.exists()) {
+        juce::Logger::writeToLog("The file does not exist, aborting the conversion");
+        return -1;
+    }
+    
+    std::vector<std::string> audioPathList;
+    audioPathList.push_back(droppedFilePath);
+
+    std::string outputDirectory = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString();
+    juce::Logger::writeToLog("Writing to " + outputDirectory);
+    bool saveMidi = true;
+    if (!parameters.isValid()) {
+        juce::Logger::writeToLog("The parameters are not initialized, aborting the conversion");
+        return -1;
+    }
+    
+    int minNoteLength, minPitch, maxPitch, midiTempo;
+    minNoteLength = (parameters.hasProperty("minNoteLength")) ? int(parameters.getProperty("minNoteLength")) : 58;
+    minPitch = (parameters.hasProperty("minPitch")) ? int(parameters.getProperty("minPitch")) : 0;
+    maxPitch = (parameters.hasProperty("maxPitch")) ? int(parameters.getProperty("maxPitch")) : 0;
+    
+    bool multiplePitchBends = false;
+    midiTempo = (parameters.hasProperty("midiTempo")) ? int(parameters.getProperty("midiTempo")) : 120;
+    
+    std::ostringstream logStream;
+    logStream << "Converting to MIDI using values: minNoteLength: " << minNoteLength << " - minPitch: " << minPitch << " - maxPitch: " << maxPitch << " - midiTempo: " << midiTempo;
+    juce::Logger::writeToLog(logStream.str());
+    return callBasicPitch(audioPathList, outputDirectory, saveMidi, minNoteLength, minPitch, maxPitch, multiplePitchBends, midiTempo);
+}
+
+int FileWindow::callBasicPitch(std::vector<std::string> audioPathList,
+                               std::string outputDirectory,
+                               bool saveMidi,
+                               int minNoteLength,
+                               int minPitch,
+                               int maxPitch,
+                               bool multiplePitchBends,
+                               int midiTempo) {
+    PyObject *pName, *pModule, *pFunc;
+    PyObject *pArgs, *pValue;
+    // Py_SetPath(L"/Users/vincenthuang/Development/basic_pitch_test");
+    Py_Initialize();
+
+    PyRun_SimpleString("import sys, os");
+    PyRun_SimpleString("sys.path.append('/Users/vincenthuang/Development/basic_pitch_test')");
+//    PyRun_SimpleString("sys.path.append(os.getcwd())");
+//    PyRun_SimpleString("print(os.getcwd())");
+
+
+    pName = PyUnicode_DecodeFSDefault("call_basic_pitch");
+
+    pModule = PyImport_Import(pName);
+    Py_DECREF(pName); // Decrement the reference count for pName, preventing memory leak
+
+    if (pModule != NULL) {
+        pFunc = PyObject_GetAttrString(pModule, "convert_to_midi");
+
+        if (pFunc && PyCallable_Check(pFunc)) {
+            pArgs = PyTuple_New(10);
+            PyObject *pList = PyList_New(0);
+            for (const auto &path : audioPathList) {
+                PyObject *pString = PyUnicode_FromString(path.c_str());
+                PyList_Append(pList, pString);
+                Py_DECREF(pString);
+            }
+
+            /*
+            Function signature
+            def convert_to_midi(
+                audio_path_list, 0
+                output_directory, 1
+                save_midi, 2
+                onset_threshold=0.5, 3
+                frame_threshold=0.3, 4
+                minimum_note_length=58, 5
+                minimum_frequency=None, 6
+                maximum_frequency=None, 7
+                multiple_pitch_bends=False, 8
+                midi_tempo=120, 9
+            )
+            */
+
+            PyTuple_SetItem(pArgs, 0, pList);
+            PyTuple_SetItem(pArgs, 1, PyUnicode_FromString(outputDirectory.c_str()));
+            PyTuple_SetItem(pArgs, 2, PyBool_FromLong(saveMidi));
+            PyTuple_SetItem(pArgs, 3, PyFloat_FromDouble(0.5)); // onset_threshold
+            PyTuple_SetItem(pArgs, 4, PyFloat_FromDouble(0.3)); // frame_threshold
+            PyTuple_SetItem(pArgs, 5, PyLong_FromLong(minNoteLength)); // minimum_note_length
+            if (minPitch == 0) {
+                PyTuple_SetItem(pArgs, 6, Py_None); // minimum_frequency
+            } else {
+                PyTuple_SetItem(pArgs, 6, PyLong_FromLong(minPitch)); // minimum_frequency
+            }
+            if (maxPitch == 0) {
+                PyTuple_SetItem(pArgs, 7, Py_None); // maximum_frequency
+            } else {
+                PyTuple_SetItem(pArgs, 7, PyLong_FromLong(maxPitch)); // maximum_frequency
+            }
+            PyTuple_SetItem(pArgs, 8, PyBool_FromLong(multiplePitchBends)); // multiple_pitch_bends
+            PyTuple_SetItem(pArgs, 9, PyLong_FromLong(midiTempo)); // midi_tempo
+
+            pValue = PyObject_CallObject(pFunc, pArgs);
+            Py_DECREF(pArgs); // decrement reference count for pArgs, preventing memory leak
+
+            if (pValue != NULL) {
+                Py_DECREF(pValue);
+            } else {
+                Py_DECREF(pFunc);
+                Py_DECREF(pModule);
+                PyErr_Print();
+                fprintf(stderr, "Call failed\n");
+                return 1;
+            }
+        }
+    } else {
+        PyErr_Print();
+        fprintf(stderr, "Failed to load call_basic_pitch.py\n");
+        return 1;
+    }
+
+    Py_Finalize();
+    return 0;
 }
 
 void FileWindow::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
@@ -74,7 +209,8 @@ void FileWindow::filesDropped(const juce::StringArray& filenames, int x, int y) 
         juce::Logger::writeToLog("Invalid format of file dropped, skipping");
         return;
     }
-    droppedFile = juce::File(filenames[0]); // store the file path
+    droppedFile = juce::File(filenames[0]); // store the file object
+    droppedFilePath = droppedFile.getFullPathName().toStdString();
     juce::Logger::writeToLog("File Dropped: " + droppedFile.getFullPathName());
 
     auto* reader = formatManager.createReaderFor(droppedFile);

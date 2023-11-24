@@ -12,7 +12,7 @@
 #include "MIDIOutput.h"
 
 //==============================================================================
-MIDIOutput::MIDIOutput() {}
+MIDIOutput::MIDIOutput(juce::ValueTree& params): parameters(params) {}
 
 MIDIOutput::~MIDIOutput() {}
 
