@@ -12,7 +12,9 @@
 #include "MIDIOutput.h"
 
 //==============================================================================
-MIDIOutput::MIDIOutput(juce::ValueTree& params): parameters(params) {}
+MIDIOutput::MIDIOutput(juce::ValueTree& params): parameters(params) {
+    addAndMakeVisible(&description);
+}
 
 MIDIOutput::~MIDIOutput() {}
 
@@ -33,12 +35,8 @@ void MIDIOutput::paint (juce::Graphics& g) {
     auto titleArea = localBounds.withHeight(4 * getHeight() / 5);
     
     g.setColour (juce::Colours::white);
-    g.setFont (25.0f);
-    g.drawText ("OutputArea", titleArea,
-                juce::Justification::centred, true);   // draw some placeholder text
-    auto subTitleArea = localBounds.withTop(localBounds.getHeight() / 3);
-    g.setFont(14.0f);
-    g.drawText("Drag and drop into your favorite DAW", subTitleArea, juce::Justification::centred, true);
+
+    description.setText("Output will show here when it is ready.", juce::dontSendNotification);
 }
 
 void MIDIOutput::mouseDrag(const juce::MouseEvent &event) {
@@ -74,4 +72,20 @@ void MIDIOutput::mouseDrag(const juce::MouseEvent &event) {
     }
 }
 
-void MIDIOutput::resized() {}
+void MIDIOutput::resized() {
+//    description.setBounds(getLocalBounds());
+    auto area = getLocalBounds().reduced(10);
+    auto height = area.getHeight() / 3;
+    auto width = area.getWidth() / 3;
+    description.setBounds(area.reduced(0, height));
+    description.setJustificationType(juce::Justification::centred);
+}
+
+void MIDIOutput::reset() {
+    description.setText("Output will show here when it is ready.", juce::dontSendNotification);
+}
+
+void MIDIOutput::onConvert() {
+    description.setText("Drag this area and drop into your favorite DAW", juce::dontSendNotification);
+}
+

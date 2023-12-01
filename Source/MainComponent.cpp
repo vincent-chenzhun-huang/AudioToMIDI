@@ -6,13 +6,16 @@ MainComponent::MainComponent()
       fileWindowComponent(params),
       paramPanel(params),
       midiOutput(params) {
+    fileWindowComponent.addListener(&midiOutput);
     setSize (700, 500);
     addAndMakeVisible(fileWindowComponent);
     addAndMakeVisible(paramPanel);
     addAndMakeVisible(midiOutput);
 }
 
-MainComponent::~MainComponent() {}
+MainComponent::~MainComponent() {
+    fileWindowComponent.removeListener(&midiOutput);
+}
 
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g) {

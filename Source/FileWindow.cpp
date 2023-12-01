@@ -23,6 +23,7 @@ FileWindow::FileWindow(juce::ValueTree& params): parameters(params), state(Stopp
     convertButton.setButtonText("Convert to MIDI");
     convertButton.onClick = [this] {
         convertMidiClicked();
+        callListeners();
     };
     convertButton.setEnabled(false);
     
@@ -291,4 +292,18 @@ void FileWindow::paint (juce::Graphics& g)
     playButton.setBounds(controlRow.removeFromLeft(getWidth() / 3.0));
     stopButton.setBounds(controlRow.removeFromLeft(getWidth() / 3.0));
     convertButton.setBounds(controlRow.removeFromLeft(getWidth() / 3.0));
+}
+
+void FileWindow::addListener(ConvertListener *listener) {
+    listeners.add(listener);
+}
+
+void FileWindow::removeListener(ConvertListener *listener) {
+    listeners.remove(listener);
+}
+
+void FileWindow::callListeners() {
+    listeners.call([&](ConvertListener& listener) {
+        listener.onConvert();
+    });
 }

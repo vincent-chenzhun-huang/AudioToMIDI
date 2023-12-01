@@ -4,6 +4,7 @@
 #include <JuceHeader.h>
 #include <Python.h>
 #include <cassert>
+#include "MIDIOutput.h"
 
 
 class FileWindow: public juce::AudioAppComponent,
@@ -29,6 +30,10 @@ public:
     // ChangeListener functions
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
     int convertMidiClicked();
+                      
+    void addListener(ConvertListener* listener);
+    void removeListener(ConvertListener* listener);
+    void callListeners();
 
 private:
     juce::ValueTree& parameters;
@@ -61,6 +66,9 @@ private:
     std::string droppedFilePath;
     juce::File outputFile;
     std::string outputDirectory;
+                      
+    // event-related
+    juce::ListenerList<ConvertListener> listeners;
     
     // Python API
     int callBasicPitch(std::vector<std::string> audioPathList,
