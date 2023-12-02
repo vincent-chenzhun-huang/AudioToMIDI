@@ -12,8 +12,7 @@ class AsciiStream:
     def flush(self):
         self.original.flush()
 
-
-
+print(sys.path)
 from basic_pitch.inference import predict_and_save
 
 # make a wrapper function for predict_and_save so that it can be called by C++
@@ -59,14 +58,15 @@ def convert_to_midi(
         midi_tempo=midi_tempo,
     )
     sys.stdout = original_stdout
+    # print('hello')
 
 
-# Restore the original stdout after calling the function
-if __name__ == '__main__':
-    convert_to_midi(
-        audio_path_list=["/Users/vincenthuang/Desktop/piano.mp3"],
-        output_directory="/Users/vincenthuang/Desktop/",
-        minimum_frequency=30,
-        maximum_frequency=2920,
-        save_midi=True,
-    )
+# # Restore the original stdout after calling the function
+# if __name__ == '__main__':
+#     convert_to_midi(
+#         audio_path_list=["/Users/vincenthuang/Desktop/piano.mp3"],
+#         output_directory="/Users/vincenthuang/Desktop/",
+#         minimum_frequency=30,
+#         maximum_frequency=2920,
+#         save_midi=True,
+#     )

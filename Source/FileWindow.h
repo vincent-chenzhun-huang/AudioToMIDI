@@ -69,6 +69,10 @@ private:
                       
     // event-related
     juce::ListenerList<ConvertListener> listeners;
+                      
+    
+    std::thread convertThread;
+    PyGILState_STATE gilState;
     
     // Python API
     int callBasicPitch(std::vector<std::string> audioPathList,

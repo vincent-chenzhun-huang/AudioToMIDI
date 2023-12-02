@@ -1,6 +1,13 @@
 #include "FileWindow.h"
 
 FileWindow::FileWindow(juce::ValueTree& params): parameters(params), state(Stopped) {
+    Py_Initialize();
+//    PyEval_InitThreads();
+//    PyEval_ReleaseLock();
+    if (PyGILState_Check () > 0) {
+       PyEval_SaveThread ();
+    }
+    
     setName("File Window");
     setOpaque(true);
     setInterceptsMouseClicks(true, true);
@@ -22,20 +29,31 @@ FileWindow::FileWindow(juce::ValueTree& params): parameters(params), state(Stopp
     addAndMakeVisible(&convertButton);
     convertButton.setButtonText("Convert to MIDI");
     convertButton.onClick = [this] {
-        convertMidiClicked();
-        callListeners();
+        if (convertThread.joinable()) convertThread.join();
+        
+        convertThread = std::thread([this] {
+            convertMidiClicked();
+            juce::MessageManager::callAsync([this] {
+                callListeners();
+            });
+        });
+        
     };
+//    convertButton.onClick = [this] {
+//        convertMidiClicked();
+//        callListeners();
+//    };
     convertButton.setEnabled(false);
     
     formatManager.registerBasicFormats(); // register the basic audio file formats, wav, aiff files
     transportSource.addChangeListener(this); // when there is a change in the transportSource, we trigger the changeListenerCallback function
     setAudioChannels(0, 2);
     
-    Py_Initialize();
 }
 
 FileWindow::~FileWindow() {
     shutdownAudio();
+    if (convertThread.joinable()) convertThread.join();
     Py_Finalize();
 
 }
@@ -83,7 +101,9 @@ int FileWindow::convertMidiClicked() {
     std::ostringstream logStream;
     logStream << "Converting to MIDI using values: minNoteLength: " << minNoteLength << " - minPitch: " << minPitch << " - maxPitch: " << maxPitch << " - midiTempo: " << midiTempo;
     juce::Logger::writeToLog(logStream.str());
+    PyGILState_STATE gilState = PyGILState_Ensure();
     int res = callBasicPitch(audioPathList, outputDirectory, saveMidi, minNoteLength, minPitch, maxPitch, multiplePitchBends, midiTempo);
+    PyGILState_Release(gilState);
     
     if (res != 0) {
         juce::Logger::writeToLog("An error occurred while converting the audio file to MIDI");
@@ -112,15 +132,20 @@ int FileWindow::callBasicPitch(std::vector<std::string> audioPathList,
     // Py_SetPath(L"/Users/vincenthuang/Development/basic_pitch_test");
 
     PyRun_SimpleString("import sys, os");
-    PyRun_SimpleString("sys.path.append('/Users/vincenthuang/Development/basic_pitch_test')");
+//    PyRun_SimpleString("sys.path.append('/Users/vincenthuang/Development/basic_pitch_test')");
+    PyRun_SimpleString("sys.path.append('/Users/vincenthuang/Development/audio_to_midi/Source')");
+    PyRun_SimpleString("sys.path[-1] = '/opt/homebrew/lib/python3.11/site-packages'");
+    PyRun_SimpleString("sys.path.append('/opt/homebrew/lib/python3.11/site-packages/basic_pitch')");
 //    PyRun_SimpleString("sys.path.append(os.getcwd())");
 //    PyRun_SimpleString("print(os.getcwd())");
 
 
-    pName = PyUnicode_DecodeFSDefault("call_basic_pitch");
+//    pName = PyUnicode_DecodeFSDefault("call_basic_pitch");
+    pModule = PyImport_ImportModule("basic_pitch.inference");
+    if (pModule==NULL) PyErr_Print();
 
-    pModule = PyImport_Import(pName);
-    Py_DECREF(pName); // Decrement the reference count for pName, preventing memory leak
+    pModule = PyImport_ImportModule("call_basic_pitch");
+//    Py_DECREF(pName); // Decrement the reference count for pName, preventing memory leak
 
     if (pModule != NULL) {
         pFunc = PyObject_GetAttrString(pModule, "convert_to_midi");
