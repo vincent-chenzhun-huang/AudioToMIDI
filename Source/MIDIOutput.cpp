@@ -14,6 +14,7 @@
 //==============================================================================
 MIDIOutput::MIDIOutput(juce::ValueTree& params): parameters(params) {
     addAndMakeVisible(&description);
+    reset();
 }
 
 MIDIOutput::~MIDIOutput() {}
@@ -36,7 +37,7 @@ void MIDIOutput::paint (juce::Graphics& g) {
     
     g.setColour (juce::Colours::white);
 
-    description.setText("Output will show here when it is ready.", juce::dontSendNotification);
+//    description.setText("Output will show here when it is ready.", juce::dontSendNotification);
 }
 
 void MIDIOutput::mouseDrag(const juce::MouseEvent &event) {
